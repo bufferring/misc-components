@@ -1,0 +1,136 @@
+body{
+    background-color: black;
+}
+
+.asist-button{
+    position: fixed;
+    bottom: 30px;
+    right: 30px;    
+    
+    height: 45px;
+    width: 45px;
+    border-radius: 60px;
+    border: none;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    cursor: pointer;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    background-color:rgb(255, 0, 0);
+    z-index: 1000; 
+    transition: background-color 0.3s ease;  
+}
+
+.asist-button:hover{ background-color: rgb(200, 0, 0);}
+
+.hidden-bar{
+    position:fixed;
+    bottom: 30px;
+    right: 30px;
+    height: 45px;
+    width: 200px;
+    background-color: white;
+    border-radius:30px;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    padding-left: 10px;
+    overflow: hidden;
+    box-shadow: 2px 2px 1px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateX(80%);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    border-left: 1px solid #ccc;
+    z-index: 3;
+}
+
+.linea {
+    background: black;
+    height: 2px;
+    width: 100%;
+    border-radius: 5px;
+    transition: all 0.5s;
+    transform-origin: left;
+}
+
+.asist-button.active .linea1 {
+    transform: translateY(-4px) translateX(4px) rotate(45deg);
+}
+
+.asist-button.active .linea2{
+    opacity: 0;
+}
+
+.asist-button.active .linea3{
+    transform: translateY(4px) translateX(4px) rotate(-45deg);
+}
+
+
+.call-bar{
+    background-color: black;
+    color:white;
+    border: none;
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 20px;
+    width: 100px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    margin: 0;
+    position: relative;
+    z-index: 5;
+}
+
+.microphone-button{
+    background-color: black;
+    color:white;
+    cursor: pointer;
+    border: none;
+    padding: 5px 8px;
+    border-radius: 20px;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    transform: translateX(10px);
+    z-index: 4;
+}
+
+.call-bar:hover{ background-color: rgb(15, 15, 15)}
+
+
+.open{
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+.close{
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(20px);
+    transition: all 0.3 ease;
+}
+
+.glow-effect{
+    animation: glow-border 1s ease-in-out infinite alternate;
+    box-shadow: 0 0 10px 2px rgba(0,255,255,0.5);
+}
+
+@keyframes glow-border{
+    from{
+        box-shadow: 0 0 5px rgba(0,255,255,0.3);
+    }
+    to {
+        box-shadow: 0 0 20px rgba(0,255,255,0.9);
+        border-color: rgba(0,255,255,1);
+    }
+    
+}
