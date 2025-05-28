@@ -1,0 +1,315 @@
+flowchart TD
+    %% Estilo
+    classDef table fill:#f5f5f5,stroke:#333,stroke-width:1px,color:#333,font-family:Arial
+    
+    %% SISTEMA DE USUARIOS
+    
+    Users["Users
+    --
+    id INT PK
+    name VARCHAR(100)
+    email VARCHAR(150)
+    password VARCHAR(256)
+    role ENUM
+    profile_image VARCHAR(255)"]
+    class Users table
+
+    Businesses["Businesses
+    --
+    id INT PK
+    user_id INT FK
+    business_name VARCHAR(150)
+    rif VARCHAR(20)
+    location_lat DECIMAL
+    location_lng DECIMAL"]
+    class Businesses table
+
+    BusinessPaymentMethods["Business Payment Methods
+    --
+    id INT PK
+    business_id INT FK
+    payment_type ENUM
+    account_details JSON
+    is_active BOOLEAN"]
+    class BusinessPaymentMethods table
+
+    %% CATÁLOGO
+    
+    Categories["Categories
+    --
+    id INT PK
+    name VARCHAR(100)
+    description TEXT
+    image VARCHAR(255)
+    parent_id INT FK"]
+    class Categories table
+    
+    Brands["Brands
+    --
+    id INT PK
+    name VARCHAR(100)
+    logo VARCHAR(255)"]
+    class Brands table
+
+    Models["Models
+    --
+    id INT PK
+    brand_id INT FK
+    name VARCHAR(100)"]
+    class Models table
+
+    Vehicles["Vehicles
+    --
+    id INT PK
+    model_id INT FK
+    year INT
+    engine VARCHAR(100)"]
+    class Vehicles table
+
+    SpareParts["Spare Parts
+    --
+    id INT PK
+    business_id INT FK
+    category_id INT FK
+    name VARCHAR(200)
+    oem_code VARCHAR(100)
+    price DECIMAL(10,2)
+    stock INT
+    featured BOOLEAN
+    condition ENUM"]
+    class SpareParts table
+
+    SparePartImages["Spare Part Images
+    --
+    id INT PK
+    spare_part_id INT FK
+    image_url VARCHAR(255)
+    is_main BOOLEAN"]
+    class SparePartImages table
+
+    SparePartVehicle["Spare Part Vehicle
+    --
+    id INT PK
+    spare_part_id INT FK
+    vehicle_id INT FK"]
+    class SparePartVehicle table
+
+    %% PROMOCIONES
+    
+    Promotions["Promotions
+    --
+    id INT PK
+    business_id INT FK
+    name VARCHAR(100)
+    start_date DATE
+    end_date DATE
+    discount_type ENUM
+    promotion_type ENUM"]
+    class Promotions table
+
+    SparePartPromotion["Spare Part Promotion
+    --
+    id INT PK
+    spare_part_id INT FK
+    promotion_id INT FK"]
+    class SparePartPromotion table
+
+    %% INTERACCIÓN
+
+    Reviews["Reviews
+    --
+    id INT PK
+    user_id INT FK
+    spare_part_id INT FK
+    rating TINYINT
+    comment TEXT"]
+    class Reviews table
+
+    ReviewImages["Review Images
+    --
+    id INT PK
+    review_id INT FK
+    image_url VARCHAR(255)"]
+    class ReviewImages table
+
+    ShoppingCarts["Shopping Carts
+    --
+    id INT PK
+    user_id INT FK"]
+    class ShoppingCarts table
+
+    CartItems["Cart Items
+    --
+    id INT PK
+    cart_id INT FK
+    spare_part_id INT FK
+    quantity INT"]
+    class CartItems table
+
+    %% VENTAS
+
+    Payments["Payments
+    --
+    id INT PK
+    user_id INT FK
+    business_id INT FK
+    amount DECIMAL(12,2)
+    payment_method_id INT FK
+    payment_status ENUM"]
+    class Payments table
+
+    Orders["Orders
+    --
+    id INT PK
+    user_id INT FK
+    business_id INT FK
+    order_number VARCHAR(50)
+    status ENUM
+    payment_id INT FK
+    total DECIMAL(10,2)"]
+    class Orders table
+
+    OrderDetails["Order Details
+    --
+    id INT PK
+    order_id INT FK
+    spare_part_id INT FK
+    quantity INT
+    unit_price DECIMAL(10,2)"]
+    class OrderDetails table
+
+    OrderTracking["Order Tracking
+    --
+    id INT PK
+    order_id INT FK
+    status VARCHAR(50)
+    created_by INT FK"]
+    class OrderTracking table
+
+    %% INVENTARIO Y REPORTES
+
+    InventoryImports["Inventory Imports
+    --
+    id INT PK
+    business_id INT FK
+    filename VARCHAR(255)
+    status ENUM"]
+    class InventoryImports table
+
+    InventoryMovements["Inventory Movements
+    --
+    id INT PK
+    business_id INT FK
+    spare_part_id INT FK
+    movement_type ENUM
+    quantity INT
+    previous_stock INT
+    current_stock INT"]
+    class InventoryMovements table
+
+    Reports["Reports
+    --
+    id INT PK
+    business_id INT FK
+    report_type VARCHAR(50)
+    parameters JSON
+    file_path VARCHAR(255)"]
+    class Reports table
+
+    Documents["Documents
+    --
+    id INT PK
+    business_id INT FK
+    document_type ENUM
+    related_id INT
+    file_path VARCHAR(255)"]
+    class Documents table
+
+    %% COMUNICACIÓN
+
+    Messages["Messages
+    --
+    id INT PK
+    sender_id INT FK
+    receiver_id INT FK
+    message TEXT
+    is_read BOOLEAN"]
+    class Messages table
+
+    Notifications["Notifications
+    --
+    id INT PK
+    user_id INT FK
+    type VARCHAR(50)
+    title VARCHAR(100)
+    is_read BOOLEAN"]
+    class Notifications table
+
+    %% AUDITORÍA
+
+    AuditLogs["Audit Logs
+    --
+    id INT PK
+    user_id INT FK
+    action VARCHAR(50)
+    entity_type VARCHAR(50)
+    entity_id INT
+    old_values JSON
+    new_values JSON"]
+    class AuditLogs table
+
+    %% SISTEMA DE USUARIOS
+    Users --> |"1:1"| Businesses
+    Businesses --> |"1:N"| BusinessPaymentMethods
+
+    %% CATÁLOGO
+    Categories --> |"1:N"| SpareParts
+    Categories --> |"1:N"| Categories
+    
+    Brands --> |"1:N"| Models
+    Models --> |"1:N"| Vehicles
+    
+    SpareParts --> |"1:N"| SparePartImages
+    SpareParts --> |"N:M"| Vehicles
+    SparePartVehicle --> |"N:1"| SpareParts
+    SparePartVehicle --> |"N:1"| Vehicles
+    
+    Businesses --> |"1:N"| SpareParts
+    
+    %% PROMOCIONES
+    Businesses --> |"1:N"| Promotions
+    Promotions --> |"N:M"| SpareParts
+    SparePartPromotion --> |"N:1"| SpareParts
+    SparePartPromotion --> |"N:1"| Promotions
+    
+    %% INTERACCIÓN
+    Users --> |"1:N"| Reviews
+    SpareParts --> |"1:N"| Reviews
+    Reviews --> |"1:N"| ReviewImages
+    
+    Users --> |"1:N"| ShoppingCarts
+    ShoppingCarts --> |"1:N"| CartItems
+    CartItems --> |"N:1"| SpareParts
+    
+    %% VENTAS
+    Users --> |"1:N"| Orders
+    Businesses --> |"1:N"| Orders
+    Orders --> |"1:N"| OrderDetails
+    OrderDetails --> |"N:1"| SpareParts
+    Orders --> |"N:1"| Payments
+    Payments --> |"N:1"| BusinessPaymentMethods
+    Orders --> |"1:N"| OrderTracking
+    
+    %% INVENTARIO Y REPORTES
+    Businesses --> |"1:N"| InventoryImports
+    Businesses --> |"1:N"| InventoryMovements
+    SpareParts --> |"1:N"| InventoryMovements
+    Businesses --> |"1:N"| Reports
+    Businesses --> |"1:N"| Documents
+    
+    %% COMUNICACIÓN
+    Users --> |"1:N"| Messages
+    Users --> |"1:N"| Notifications
+    
+    %% AUDITORÍA
+    Users --> |"1:N"| AuditLogs
