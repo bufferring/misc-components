@@ -110,47 +110,51 @@ class DatabaseVisualizer {
         document.getElementById('save-edit').addEventListener('click', () => this.saveTableEdit());
     }
 
-    createParticleSystem() {
-        const particleCount = 1000;
-        const particles = new THREE.BufferGeometry();
-        const positions = new Float32Array(particleCount * 3);
-        const colors = new Float32Array(particleCount * 3);
-        const sizes = new Float32Array(particleCount);
+   createParticleSystem() {
+    const particleCount = 1000;
+    const particles = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
 
-        for (let i = 0; i < particleCount; i++) {
-            const i3 = i * 3;
-            
-            // Random positions
-            positions[i3] = (Math.random() - 0.5) * 200;
-            positions[i3 + 1] = (Math.random() - 0.5) * 200;
-            positions[i3 + 2] = (Math.random() - 0.5) * 200;
-            
-            // Random colors (blue-ish theme)
-            colors[i3] = 0.2 + Math.random() * 0.3;
-            colors[i3 + 1] = 0.4 + Math.random() * 0.4;
-            colors[i3 + 2] = 0.8 + Math.random() * 0.2;
-            
-            // Random sizes
-            sizes[i] = Math.random() * 2 + 0.5;
-        }
-
-        particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-        particles.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-
-        const particleMaterial = new THREE.PointsMaterial({
-            size: 1,
-            sizeAttenuation: true,
-            vertexColors: true,
-            transparent: true,
-            opacity: 0.6,
-            blending: THREE.AdditiveBlending
-        });
-
-        this.particleSystem = new THREE.Points(particles, particleMaterial);
-        this.particles = particles;
-        this.scene.add(this.particleSystem);
+    for (let i = 0; i < particleCount; i++) {
+        const i3 = i * 3;
+        positions[i3] = (Math.random() - 0.5) * 200;
+        positions[i3 + 1] = (Math.random() - 0.5) * 200;
+        positions[i3 + 2] = (Math.random() - 0.5) * 200;
+        sizes[i] = Math.random() * 0.1 + 0.1;
     }
+
+    particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    particles.setAttribute('size', new THREE.BufferAttribute(sizes, 0.3));
+
+    // Textura circular
+    const createCircleTexture = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 32;
+        canvas.height = 32;
+        const ctx = canvas.getContext('2d');
+        ctx.beginPath();
+        ctx.arc(16, 16, 16, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        return new THREE.CanvasTexture(canvas);
+    };
+
+    const particleMaterial = new THREE.PointsMaterial({
+        map: createCircleTexture(),
+        alphaTest: 0.01,
+        color: 0xcccccc,
+        size: 1,
+        sizeAttenuation: true,
+        transparent: true,
+        opacity: 0.6,
+        blending: THREE.AdditiveBlending
+    });
+
+    this.particleSystem = new THREE.Points(particles, particleMaterial);
+    this.particles = particles;
+    this.scene.add(this.particleSystem);
+}
 
     async loadSchema() {
         const response = await fetch('/api/schema');
@@ -159,35 +163,36 @@ class DatabaseVisualizer {
         this.relationships = data.relationships;
     }
 
-    createTextTexture(text, fontSize = 64, color = '#ffffff', backgroundColor = 'transparent') {
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        
-        // Set canvas size
-        canvas.width = 512;
-        canvas.height = 128;
-        
-        // Set font and measure text
-        context.font = `bold ${fontSize}px Arial`;
-        context.textAlign = 'center';
-        context.textBaseline = 'middle';
-        
-        // Clear canvas
-        if (backgroundColor !== 'transparent') {
-            context.fillStyle = backgroundColor;
-            context.fillRect(0, 0, canvas.width, canvas.height);
-        }
-        
-        // Draw text
-        context.fillStyle = color;
-        context.fillText(text, canvas.width / 2, canvas.height / 2);
-        
-        // Create texture
-        const texture = new THREE.CanvasTexture(canvas);
-        texture.needsUpdate = true;
-        
-        return texture;
-    }
+   createTextTexture(text, fontSize = 64) {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    
+    // Tamaño dinámico basado en longitud del texto
+    const textWidth = context.measureText(text).width;
+    canvas.width = Math.max(1024, textWidth * 2);
+    canvas.height = fontSize * 2.5;
+    
+    // Fondo semitransparente para mejor contraste
+    //context.fillStyle = 'rgba(50, 50, 50, 0.7)';
+    //context.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Texto con borde
+    context.font = `bold ${fontSize}px 'Segoe UI', Arial, sans-serif`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.strokeStyle = 'black';
+    context.lineWidth = fontSize / 10;
+    context.strokeText(text, canvas.width/2, canvas.height/2);
+    context.fillStyle = 'white';
+    context.fillText(text, canvas.width/2, canvas.height/2);
+    
+    // Mejor filtrado para textura
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.anisotropy = 16; // Mejor calidad en ángulos oblicuos
+    texture.minFilter = THREE.LinearFilter;
+    
+    return texture;
+}
 
     createTables() {
         const tableNames = Object.keys(this.tables);
@@ -229,7 +234,7 @@ class DatabaseVisualizer {
             // Create fields
             table.fields.forEach((field, fieldIndex) => {
                 const fieldGeometry = new THREE.BoxGeometry(8, 0.6, 0.15);
-                const fieldColor = field.is_primary ? 0xffd700 : 0xe5e7eb;
+                const fieldColor = 0xe5e7eb;
                 const fieldMaterial = new THREE.MeshLambertMaterial({ color: fieldColor });
                 const fieldMesh = new THREE.Mesh(fieldGeometry, fieldMaterial);
                 
@@ -302,20 +307,31 @@ class DatabaseVisualizer {
 
     positionTables() {
         const tableNames = Object.keys(this.tableObjects);
-        const radius = 25;
-        const angleStep = (Math.PI * 2) / tableNames.length;
+    const radius = 25; 
+    
+    
+    tableNames.forEach((tableName, index) => {
+        const goldenRatio = (1 + Math.sqrt(5)) / 2;
+        const increment = Math.PI * (3 - Math.sqrt(5));
+        const y = 1 - (index / (tableNames.length - 1)) * 2; 
+        const radiusAtY = Math.sqrt(1 - y * y); 
         
-        tableNames.forEach((tableName, index) => {
-            const angle = index * angleStep;
-            const x = Math.cos(angle) * radius;
-            const z = Math.sin(angle) * radius;
-            const y = (Math.random() - 0.5) * 10;
-            
-            this.tableObjects[tableName].position.set(x, y, z);
-        });
         
-        // Update relationship lines
-        this.updateRelationshipLines();
+        const theta = index * increment;
+        
+        const x = Math.cos(theta) * radiusAtY;
+        const z = Math.sin(theta) * radiusAtY;
+        
+        const variation = 0.95 + Math.random() * 0.1; 
+        const finalX = x * radius * variation;
+        const finalY = y * radius * variation;
+        const finalZ = z * radius * variation;
+        
+        this.tableObjects[tableName].position.set(finalX, finalY, finalZ);
+    });
+    
+    
+    this.updateRelationshipLines();
     }
 
     updateRelationshipLines() {
@@ -565,11 +581,11 @@ class DatabaseVisualizer {
         this.closeEditModal();
     }
 
-    resetView() {
+ resetView() {
         this.camera.position.set(0, 20, 30);
         this.controls.reset();
     }
-
+   
     toggleRelations() {
         this.showRelations = !this.showRelations;
         this.relationshipLines.forEach(line => {
