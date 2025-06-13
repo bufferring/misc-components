@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarFix Database 3D Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+        #canvas-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        #ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+        .ui-panel {
+            pointer-events: auto;
+        }
+        #table-info {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .field-item {
+            transition: all 0.2s ease;
+        }
+        .field-item:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+        .particle-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- UI Overlay -->
+    <div id="ui-overlay">
+        <!-- Top Navigation -->
+        <nav class="ui-panel bg-gray-800 bg-opacity-90 backdrop-blur-sm p-4 shadow-lg">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-blue-400">CarFix Database 3D Visualizer</h1>
+                <div class="flex space-x-4">
+                    <button id="reset-view" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
+                        Reset View
+                    </button>
+                    <button id="toggle-relations" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors">
+                        Toggle Relations
+                    </button>
+                    <button id="toggle-particles" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition-colors">
+                        Toggle Particles
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Side Panel -->
+        <div class="ui-panel absolute right-4 top-20 w-80 bg-gray-800 bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg p-4">
+            <h2 class="text-xl font-semibold mb-4 text-blue-300">Table Information</h2>
+            <div id="table-info" class="space-y-2">
+                <p class="text-gray-400">Click on a table to view details</p>
+            </div>
+        </div>
+
+        <!-- Bottom Controls -->
+        <div class="ui-panel absolute bottom-4 left-4 bg-gray-800 bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg p-4">
+            <h3 class="text-lg font-semibold mb-2 text-blue-300">Controls</h3>
+            <div class="text-sm text-gray-300 space-y-1">
+                <p>• Left click + drag: Rotate view</p>
+                <p>• Right click + drag: Pan view</p>
+                <p>• Scroll: Zoom in/out</p>
+                <p>• Click table: View details</p>
+                <p>• Double-click table: Edit mode</p>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="ui-panel absolute inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center">
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-400 mx-auto mb-4"></div>
+                <p class="text-xl text-blue-300">Loading Database Schema...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg p-6 w-96 max-h-96 overflow-y-auto">
+            <h3 class="text-xl font-semibold mb-4 text-blue-300">Edit Table</h3>
+            <div id="edit-content">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+            <div class="flex justify-end space-x-2 mt-4">
+                <button id="cancel-edit" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded transition-colors">
+                    Cancel
+                </button>
+                <button id="save-edit" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition-colors">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    
+    <script type="module" src="{{ url_for('static', filename='js/visualizer.js') }}"></script>
+</body>
+</html>
